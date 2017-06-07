@@ -35,9 +35,12 @@ using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Assertion element specified in [Saml, 2.3.2].
+    /// </summary>
     public class SamlAssertion //: ICanonicalWriterEndRootElementCallback
     {
-        private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
+        private SamlId _assertionId = //SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
         private string _issuer;
         private Collection<SamlStatement> _statements = new Collection<SamlStatement>();
         private XmlTokenStream _tokenStream;

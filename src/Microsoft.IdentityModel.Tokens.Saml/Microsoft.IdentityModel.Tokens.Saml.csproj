@@ -26,4 +26,14 @@
     <Compile Remove="Saml\*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="Saml\LogMessages.cs" />
+    <Compile Include="Saml\SamlAction.cs" />
+    <Compile Include="Saml\SamlAdvice.cs" />
+    <Compile Include="Saml\SamlConstants.cs" />
+    <Compile Include="Saml\SamlDoNotCacheCondition.cs" />
+    <Compile Include="Saml\SamlSecurityToken.cs" />
+    <Compile Include="Saml\SamlSerializer.cs" />
+  </ItemGroup>
+
 </Project>

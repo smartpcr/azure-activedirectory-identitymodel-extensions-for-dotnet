@@ -295,6 +295,12 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new DSigTheoryData
                 {
+                    SignedInfoTestSet = ReferenceXml.SamlSecurityToken,
+                    TestId = nameof(ReferenceXml.SamlSecurityToken)
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
                     SignedInfoTestSet = ReferenceXml.SignInfoStartsWithWhiteSpace,
                     TestId = nameof(ReferenceXml.SignInfoStartsWithWhiteSpace),
                 });
