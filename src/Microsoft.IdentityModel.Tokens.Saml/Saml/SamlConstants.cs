@@ -27,8 +27,13 @@
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Contains constants related to SAML.
+    /// </summary>
     public static class SamlConstants
     {
+#pragma warning disable 1591
+        public const string DefaultActionNamespace = "urn:oasis:names:tc:SAML:1.0:action:rwedc-negation";
         public const int MajorVersionValue = 1;
         public const int MinorVersionValue = 1;
         public const string Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
@@ -141,6 +146,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         }
 
+        public static class Types
+        {
+            public const string ActionType = "ActionType";
+            public const string AdviceType = "AdviceType";
+            public const string AssertionType = "AssertionType";
+            public const string AttributeStatementType = "AttributeStatementType";
+            public const string AttributeType = "AttributeType";
+            public const string AudienceRestrictionType = "AudienceRestrictionType";
+            public const string AuthnContextType = "AuthnContextType";
+            public const string AuthnStatementType = "AuthnStatementType";
+            public const string AuthzDecisionStatementType = "AuthzDecisionStatementType";
+            public const string BaseIDAbstractType = "BaseIDAbstractType";
+            public const string ConditionAbstractType = "ConditionAbstractType";
+            public const string ConditionsType = "ConditionsType";
+            public const string EncryptedElementType = "EncryptedElementType";
+            public const string EvidenceType = "EvidenceType";
+            public const string KeyInfoConfirmationDataType = "KeyInfoConfirmationDataType";
+            public const string NameIDType = "NameIDType";
+            public const string OneTimeUseType = "OneTimeUseType";
+            public const string ProxyRestrictionType = "ProxyRestrictionType";
+            public const string SubjectType = "SubjectType";
+            public const string SubjectConfirmationDataType = "SubjectConfirmationDataType";
+            public const string SubjectConfirmationType = "SubjectConfirmationType";
+            public const string SubjectLocalityType = "SubjectLocalityType";
+            public const string StatementAbstractType = "StatementAbstractType";
+        }
 
+#pragma warning restore 1591
     }
 }

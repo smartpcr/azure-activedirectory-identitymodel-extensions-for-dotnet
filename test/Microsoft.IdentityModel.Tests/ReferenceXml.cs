@@ -24,8 +24,10 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+#if NET452
 
 using System;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
@@ -45,7 +47,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        #region EnvelopedSignatureReader / Writer
+#region EnvelopedSignatureReader / Writer
 
         public static string Saml2Token_TwoSignatures
         {
@@ -254,9 +256,9 @@ namespace Microsoft.IdentityModel.Tests
             get { return @"<Assertion ID = ""_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"" IssueInstant=""2017-03-20T15:52:31.957Z"" Version=""2.0"" xmlns=""urn:oasis:names:tc:SAML:2.0:assertion""><Issuer>https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/</Issuer><Signature xmlns=""http://www.w3.org/2000/09/xmldsig#""><SignedInfo><CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /><SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" /><Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2""><Transforms><Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" /><Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /></Transforms><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" /><DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue></Reference></SignedInfo><SignatureValue>NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate></X509Data></KeyInfo></Signature><Subject><NameID Format=""urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"">RrX3SPSxDw6z4KHaKB2V_mnv0G-LbRZdYvo1RQa1L7s</NameID><SubjectConfirmation Method=""urn:oasis:names:tc:SAML:2.0:cm:bearer"" /></Subject><Conditions NotBefore=""2017-03-20T15:47:31.957Z"" NotOnOrAfter=""2017-03-20T16:47:31.957Z""><AudienceRestriction><Audience>spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4</Audience></AudienceRestriction></Conditions><AttributeStatement><Attribute Name=""http://schemas.microsoft.com/identity/claims/tenantid""><AttributeValue>add29489-7269-41f4-8841-b63c95564420</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/objectidentifier""><AttributeValue>d1ad9ce7-b322-4221-ab74-1e1011e1bbcb</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name""><AttributeValue>User1@Cyrano.onmicrosoft.com</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname""><AttributeValue>1</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname""><AttributeValue>User</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/displayname""><AttributeValue>User1</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/identityprovider""><AttributeValue>https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/</AttributeValue></Attribute></AttributeStatement><AuthnStatement AuthnInstant=""2017-03-20T15:52:31.551Z""><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>"; }
         }
 
-        #endregion
+#endregion
 
-        #region KeyInfo
+#region KeyInfo
 
         public static KeyInfoTestSet KeyInfoWrongElement
         {
@@ -586,9 +588,9 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
-        #endregion
+#endregion
 
-        #region Signature
+#region Signature
 
         public static SignatureTestSet Signature_UnknownDigestAlgorithm
         {
@@ -690,9 +692,9 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region SignInfo
+#region SignInfo
 
         public static SignedInfoTestSet SignInfoStartsWithWhiteSpace
         {
@@ -934,6 +936,86 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+    public static SamlInfoTestSet SamlInfoValid
+        {
+        get
+        {
+                Collection<string> audience = new Collection<string>();
+                audience.Add("http://default.audience.com/");
+
+                Collection<SamlAttribute> attributes = new Collection<SamlAttribute>();
+                // Add attribute: AttributeName = "country", value = "USA"
+                Collection<string> attributeValues1 = new Collection<string>();
+                attributeValues1.Add("USA");
+                SamlAttribute attribute1 = new SamlAttribute
+                {
+                    Name = "country",
+                    Values = attributeValues1
+                };
+                attributes.Add(attribute1);
+
+                // Add attribute: AttributeName = "emailaddress", value = "Bob @contoso.com"
+                Collection<string> attributeValues2 = new Collection<string>();
+                attributeValues2.Add(@"Bob @contoso.com");
+                SamlAttribute attribute2 = new SamlAttribute
+                {
+                    Name = "emailaddress",
+                    Values = attributeValues2
+                };
+                attributes.Add(attribute2);
+
+                // Add attribute: AttributeName = "givenname", value = "Bob"
+                Collection<string> attributeValues3 = new Collection<string>();
+                attributeValues3.Add("Bob");
+                SamlAttribute attribute3 = new SamlAttribute
+                {
+                    Name = "givenname",
+                    Values = attributeValues3
+                };
+                attributes.Add(attribute3);
+
+                // Add attribute: AttributeName = "homephone", value = "555.1212"
+                Collection<string> attributeValues4 = new Collection<string>();
+                attributeValues4.Add("555.1212");
+                SamlAttribute attribute4 = new SamlAttribute
+                {
+                    Name = "homephone",
+                    Values = attributeValues4
+                };
+                attributes.Add(attribute4);
+
+                // Add attribute: AttributeName = "role", value = "Developer", "Sales", "role1", "roles1"
+                Collection<string> attributeValues4 = new Collection<string>();
+                attributeValues4.Add("555.1212");
+                SamlAttribute attribute4 = new SamlAttribute
+                {
+                    Name = "roles",
+                    Values = attributeValues4
+                };
+                attributes.Add(attribute4);
+
+                return new SamlInfoTestSet
+                {
+                    SamlInfo = new SamlInfo
+                    {
+                        AssertionID = @"_b95759d0-73ae-4072-a140-567ade10a7ad",
+                    },
+                    Xml = RefrenceTokens.Saml1Token_1
+                //Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
+                //        <CanonicalizationMethod Algorithm= ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                //        <SignatureMethod Algorithm= """" />
+                //        <Reference URI= ""#091a00cc-4361-4303-9f1a-d4be45b2b84c"">
+                //            <Transforms>
+                //                <Transform Algorithm= ""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
+                //                <Transform Algorithm= ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                //            </Transforms>
+                //            <DigestMethod Algorithm= ""http://www.w3.org/2001/04/xmlenc#sha256"" />
+                //            <DigestValue>JaDhvSguu/XZ8jZmh7KmhbOr4deZB4/iL1adETm9oPc=</DigestValue>
+                //        </Reference>
+                //    </SignedInfo>"
+            };
+        }
+    }
         #endregion
 
         #region Wresult
@@ -1081,9 +1163,9 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region Token
+#region Token
 
         public static string Token_Saml2_Valid
         {
@@ -1093,7 +1175,8 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        #endregion
+#endregion
 
     }
 }
+#endif

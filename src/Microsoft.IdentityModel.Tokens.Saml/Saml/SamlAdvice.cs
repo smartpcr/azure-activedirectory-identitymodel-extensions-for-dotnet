@@ -25,39 +25,64 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Advice element specified in [Saml, 2.3.2.2].
+    /// </summary>
+    /// <remarks>
+    /// This information MAY be ignored by applications without affecting either
+    /// the semantics or the validity of the assertion.
+    /// </remarks>
     public class SamlAdvice
     {
-        private Collection<string> _assertionIdReferences = new Collection<string>();
+        private Collection<SamlId> _assertionIdReferences = new Collection<SamlId>();
         private Collection<SamlAssertion> _assertions = new Collection<SamlAssertion>();
 
+
+        /// <summary>
+        /// Creates an instance of SamlAdvice.
+        /// </summary>
         public SamlAdvice()
             : this(null, null)
         {
         }
 
-        public SamlAdvice(IEnumerable<string> references)
+        /// <summary>
+        /// Creates an instance of SamlAdvice.
+        /// </summary>
+        /// <param name="references"><see cref="SamlId"/></param>
+        public SamlAdvice(Collection<SamlId> references)
             : this(references, null)
         {
         }
 
-        public SamlAdvice(IEnumerable<SamlAssertion> assertions)
+        /// <summary>
+        /// Creates an instance of SamlAdvice.
+        /// </summary>
+        /// <param name="assertions"><see cref="SamlAssertion"/></param>
+        public SamlAdvice(Collection<SamlAssertion> assertions)
             : this(null, assertions)
         {
         }
 
-        public SamlAdvice(IEnumerable<string> references, IEnumerable<SamlAssertion> assertions)
+        /// <summary>
+        /// Creates an instance of SamlAdvice.
+        /// </summary>
+        /// <param name="references"><see cref="SamlId"/></param>
+        /// <param name="assertions"><see cref="SamlAssertion"/></param>
+        public SamlAdvice(Collection<SamlId> references, Collection<SamlAssertion> assertions)
         {
             if (references != null)
             {
-                foreach (string idReference in references)
+                foreach (SamlId idReference in references)
                 {
-                    if (string.IsNullOrEmpty(idReference))
+                    if (idReference == null)
                         throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
 
                     _assertionIdReferences.Add(idReference);
@@ -76,12 +101,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        public ICollection<string> AssertionIdReferences
+        /// <summary>
+        /// Gets a collection of <see cref="Uri"/> representing the assertions in the <see cref="SamlAdvice"/>.
+        /// </summary>
+        public Collection<SamlId> AssertionIdReferences
         {
             get { return _assertionIdReferences; }
         }
 
-        public ICollection<SamlAssertion> Assertions
+
+        /// <summary>
+        /// Gets a collection of <see cref="SamlAssertion"/> representating the assertions in the <see cref="SamlAdvice"/>.
+        /// </summary>
+        public Collection<SamlAssertion> Assertions
         {
             get { return _assertions; }
         }

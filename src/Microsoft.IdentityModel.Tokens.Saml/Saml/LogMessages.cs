@@ -51,6 +51,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11109 = "IDX11109: SamlAssertion.Issuer cannont be null or empty when creating claims.";
         internal const string IDX11110 = "IDX11110: The SamlSecurityToken must have a value for its Assertion property.";
 
+        internal const string IDX11111 = "IDX11111: When reading '{0}', '{1}' was not a Absolute Uri, was: '{2}'.";
+        internal const string IDX11112 = "IDX11112: Exception thrown while reading '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
+        internal const string IDX11114 = "IDX11114: Unable to read SamlSecurityToken. Expecting XmlReader to be at element: '{0}', found 'Empty Element'";
+
 #pragma warning restore 1591
     }
 }

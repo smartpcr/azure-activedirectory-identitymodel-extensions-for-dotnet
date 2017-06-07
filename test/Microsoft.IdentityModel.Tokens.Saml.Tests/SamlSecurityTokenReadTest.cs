@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,52 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET452
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Protocols.WsFederation;
+using System.IO;
+using System.Text;
+using System.Xml;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Xml;
+using Xunit;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
-
-    public class KeyInfoTestSet
+    class SamlSecurityTokenReadTest
     {
-        public string Xml { get; set; }
 
-        public KeyInfo KeyInfo { get; set; }
+        public static TheoryData<SamlTokenTheoryData> SamlReadFromTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<SamlTokenTheoryData>();
+
+                theoryData.Add(new SamlTokenTheoryData
+                {
+                    First = true,
+                //    SamlInfoTestSet = 
+                });
+            }
+        }
+
     }
 
-    public class SignatureTestSet
+    public class SamlTokenTheoryData : TheoryDataBase
     {
-        public SecurityKey SecurityKey { get; set; } = ReferenceXml.Saml2Token_Valid_SecurityKey;
+       // public SamlInfoTestSet SamlInfoTestSet { get; set; }
+        //   public KeyInfoTestSet KeyInfoTestSet { get; set; }
 
-        public Signature Signature { get; set; }
+        //  public SignatureTestSet SignatureTestSet { get; set; }
 
-        public string Xml { get; set; }
-    }
+        //   public SigningCredentials SigningCredentials { get; set; }
 
-    public class SignedInfoTestSet
-    {
-        public SignedInfo SignedInfo { get; set; }
-
-        public string Xml { get; set; }
-    }
-
-    public class SamlInfoTestSet
-    {
-        public SamlInfo SamlInfo { get; set; }
-        public string Xml { get; set; }
-    }
-
-    public class WsFederationMessageTestSet
-    {
-        public WsFederationMessage WsFederationMessage { get; set; }
-
-        public string Xml { get; set; }
+        //    public SignedInfoTestSet SignedInfoTestSet { get; set; }
     }
 }
-
-#endif

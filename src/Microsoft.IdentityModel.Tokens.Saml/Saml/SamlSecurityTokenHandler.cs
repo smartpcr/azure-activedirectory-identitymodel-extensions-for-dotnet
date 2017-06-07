@@ -143,7 +143,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             };
         }
 
-
+        /// <summary>
+        /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
+        /// </summary>
         public SamlSerializer Serializer { get; set; } = new SamlSerializer();
 
         /// <summary>
@@ -772,11 +774,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Deserializes from XML a token of the type handled by this instance.
+        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="reader">An XML reader positioned at the token's start 
-        /// element.</param>
-        /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
+        /// <param name="token">a Saml token as a string.</param>
+        /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="SamlSecurityToken"/></returns>
         public override SecurityToken ReadToken(string token)
         {
             if (string.IsNullOrEmpty(token))

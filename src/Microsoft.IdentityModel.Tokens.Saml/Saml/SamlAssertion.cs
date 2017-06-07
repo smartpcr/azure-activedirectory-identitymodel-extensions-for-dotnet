@@ -35,6 +35,9 @@ using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Assertion element specified in [Saml, 2.3.2].
+    /// </summary>
     public class SamlAssertion //: ICanonicalWriterEndRootElementCallback
     {
         private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
@@ -43,8 +46,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private XmlTokenStream _tokenStream;
         private XmlTokenStream _sourceData;
 
+        /// <summary>
+        /// Creates an instance of a SamlAssertion.
+        /// </summary>
         public SamlAssertion() { }
 
+        /// <summary>
+        /// Creates an instance of a SamlAssertion.
+        /// </summary>
+        /// <param name="assertionId"></param>
+        /// <param name="issuer"></param>
+        /// <param name="issueInstant"></param>
+        /// <param name="samlConditions"></param>
+        /// <param name="samlAdvice"></param>
+        /// <param name="samlStatements"></param>
         public SamlAssertion(
             string assertionId,
             string issuer,
@@ -87,18 +102,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogExceptionMessage(new ArgumentException("SAMLAssertionRequireOneStatement"));
         }
 
-        public SecurityKey SecurityKey { get; set; }
+        //   public SecurityKey SecurityKey { get; set; }
 
+        /// <summary>
+        /// Gets the minor version of this assertion. [Saml, 2.3.2]
+        /// <remarks>
+        /// The identifier for the version of SAML defined in this specification is 1.
+        /// </remarks>
+        /// </summary>
         public int MinorVersion
         {
             get { return SamlConstants.MinorVersionValue; }
         }
 
+        /// <summary>
+        /// Gets the major version of this assertion. [Saml, 2.3.2]
+        /// <remarks>
+        /// The identifier for the version of SAML defined in this specification is 1.
+        /// </remarks>
+        /// </summary>
         public int MajorVersion
         {
             get { return SamlConstants.MajorVersionValue; }
         }
 
+        /// <summary>
+        /// Gets or sets the identifier for this assertion.
+        /// </summary>
         public string AssertionId
         {
             get { return _assertionId; }
@@ -135,6 +165,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             get { return null != _sourceData; }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="SamlNameIdentifier"/> as the authority that is making the claim(s) in the assertion. [Saml2Core, 2.3.3]
+        /// </summary>
         public string Issuer
         {
             get { return _issuer; }
@@ -147,12 +180,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
+        /// <summary>
+        /// Gets or sets the time instant of issue in UTC.
+        /// </summary>
         public DateTime IssueInstant { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SamlConditions Conditions { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SamlAdvice Advice { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IList<SamlStatement> Statements
         {
             get
@@ -161,10 +206,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SigningCredentials SigningCredentials { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Signature Signature { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SecurityKey SignatureVerificationKey { get; set; }
 
         /// <summary>
