@@ -35,29 +35,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// This exception is thrown when reading a <see cref="Saml2SecurityToken"/>.
     /// </summary>
-    public class SamlSecurityTokenReadException : Saml2SecurityTokenException
+    public class Saml2SecurityTokenReadException : Saml2SecurityTokenException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
+        /// Initializes a new instance of the <see cref="Saml2SecurityTokenReadException"/> class.
         /// </summary>
-        public SamlSecurityTokenReadException()
+        public Saml2SecurityTokenReadException()
             : base()
         {}
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
+        /// Initializes a new instance of the <see cref="Saml2SecurityTokenReadException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SamlSecurityTokenReadException(string message)
+        public Saml2SecurityTokenReadException(string message)
             : base(message)
         {}
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
+        /// Initializes a new instance of the <see cref="Saml2SecurityTokenReadException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SamlSecurityTokenReadException(string message, Exception innerException)
+        public Saml2SecurityTokenReadException(string message, Exception innerException)
             : base(message, innerException)
         {}
 
