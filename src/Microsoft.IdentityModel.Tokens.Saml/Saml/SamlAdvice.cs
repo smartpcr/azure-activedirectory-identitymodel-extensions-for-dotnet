@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </remarks>
     public class SamlAdvice
     {
-        private Collection<SamlId> _assertionIdReferences = new Collection<SamlId>();
+        private Collection<string> _assertionIdReferences = new Collection<string>();
         private Collection<SamlAssertion> _assertions = new Collection<SamlAssertion>();
 
 
@@ -56,8 +56,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Creates an instance of SamlAdvice.
         /// </summary>
-        /// <param name="references"><see cref="SamlId"/></param>
-        public SamlAdvice(Collection<SamlId> references)
+        /// <param name="references">saml ID list</param>
+        public SamlAdvice(Collection<string> references)
             : this(references, null)
         {
         }
@@ -74,13 +74,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Creates an instance of SamlAdvice.
         /// </summary>
-        /// <param name="references"><see cref="SamlId"/></param>
+        /// <param name="references">Saml ID list</param>
         /// <param name="assertions"><see cref="SamlAssertion"/></param>
-        public SamlAdvice(Collection<SamlId> references, Collection<SamlAssertion> assertions)
+        public SamlAdvice(Collection<string> references, Collection<SamlAssertion> assertions)
         {
             if (references != null)
             {
-                foreach (SamlId idReference in references)
+                foreach (var idReference in references)
                 {
                     if (idReference == null)
                         throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets a collection of <see cref="Uri"/> representing the assertions in the <see cref="SamlAdvice"/>.
         /// </summary>
-        public Collection<SamlId> AssertionIdReferences
+        public Collection<string> AssertionIdReferences
         {
             get { return _assertionIdReferences; }
         }

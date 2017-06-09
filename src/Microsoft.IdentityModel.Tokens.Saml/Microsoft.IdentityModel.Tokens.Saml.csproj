@@ -31,13 +31,23 @@
     <Compile Include="Saml\SamlAction.cs" />
     <Compile Include="Saml\SamlAdvice.cs" />
     <Compile Include="Saml\SamlAssertion.cs" />
+    <Compile Include="Saml\SamlAttribute.cs" />
+    <Compile Include="Saml\SamlAttributeStatement.cs" />
+    <Compile Include="Saml\SamlAudienceRestrictionCondition.cs" />
+    <Compile Include="Saml\SamlAuthenticationStatement.cs" />
+    <Compile Include="Saml\SamlAuthorityBinding.cs" />
+    <Compile Include="Saml\SamlAuthorizationDecisionStatement.cs" />
+    <Compile Include="Saml\SamlCondition.cs" />
     <Compile Include="Saml\SamlConditions.cs" />
     <Compile Include="Saml\SamlConstants.cs" />
+    <Compile Include="Saml\SamlDoNotCacheCondition.cs" />
     <Compile Include="Saml\SamlNameIdentifier.cs" />
     <Compile Include="Saml\SamlSecurityToken.cs" />
     <Compile Include="Saml\SamlSecurityTokenHandler.cs" />
     <Compile Include="Saml\SamlSerializer.cs" />
     <Compile Include="Saml\SamlStatement.cs" />
+    <Compile Include="Saml\SamlSubject.cs" />
+    <Compile Include="Saml\SamlSubjectStatement.cs" />
   </ItemGroup>
 
 </Project>

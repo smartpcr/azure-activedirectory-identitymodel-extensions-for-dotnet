@@ -27,15 +27,15 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Tokens.Saml2
+namespace Microsoft.IdentityModel.Tokens.Saml
 {
 #if DESKTOPNET45
         [Serializable]
 #endif
     /// <summary>
-    /// This exception is thrown when reading a <see cref="Saml2SecurityToken"/>.
+    /// This exception is thrown when reading a <see cref="SamlSecurityToken"/>.
     /// </summary>
-    public class SamlSecurityTokenReadException : Saml2SecurityTokenException
+    public class SamlSecurityTokenReadException : SamlSecurityTokenException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.

@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlSerializer
     {
+#pragma warning disable 1591
+
         /// <summary>
         /// Instaniates a new instance of <see cref="SamlSerializer"/>.
         /// </summary>
@@ -169,59 +171,64 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(envelopeReader, SamlConstants.Types.AssertionType, SamlConstants.Namespace);
 
-                // @Version - required - must be "2.0"
-                string version = envelopeReader.GetAttribute(SamlConstants.Attributes.Version);
-                if (string.IsNullOrEmpty(version))
-                    throw LogReadException(LogMessages.IDX11106, SamlConstants.Elements.Assertion, SamlConstants.Attributes.Version);
+                // @MajorVersion - required - must be "1"
+                string majorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MajorVersion);
+                if (string.IsNullOrEmpty(majorVersion))
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MajorVersion);
 
-                if (!StringComparer.Ordinal.Equals(Saml2Constants.Version, version))
-                    throw LogReadException(LogMessages.IDX11137, version);
+                if (!StringComparer.Ordinal.Equals(SamlConstants.MajorVersionValue.ToString(), majorVersion))
+                    throw LogReadException(LogMessages.IDX11116, majorVersion);
+
+                // @MinorVersion - required - must be "1"
+                string minorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MinorVersion);
+                if (string.IsNullOrEmpty(minorVersion))
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MinorVersion);
+
+                if (!StringComparer.Ordinal.Equals(SamlConstants.MinorVersionValue.ToString(), minorVersion))
+                    throw LogReadException(LogMessages.IDX11117, minorVersion);
 
                 // @ID - required
-                string value = envelopeReader.GetAttribute(Saml2Constants.Attributes.ID);
+                string value = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionId);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.AssertionId);
+                assertion.AssertionId = value;
 
-                assertion.Id = new Saml2Id(value);
+                // @Issuer - required
+                value = envelopeReader.GetAttribute(SamlConstants.Attributes.Issuer);
+                if (string.IsNullOrEmpty(value))
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.Issuer);
+                assertion.Issuer = value;
 
                 // @IssueInstant - required
-                value = envelopeReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
+                value = envelopeReader.GetAttribute(SamlConstants.Attributes.IssueInstant);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
-
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.IssueInstant);
                 assertion.IssueInstant = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
-                // will move to next element
-                // <ds:Signature> 0-1 read by EnvelopedSignatureReader
-                envelopeReader.Read();
-
-                // <Issuer> 1
-                assertion.Issuer = ReadIssuer(envelopeReader);
-
-                // <Subject> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
-                    assertion.Subject = ReadSubject(envelopeReader);
-
                 // <Conditions> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
+                if (envelopeReader.IsStartElement(SamlConstants.Elements.Conditions, SamlConstants.Namespace))
                     assertion.Conditions = ReadConditions(envelopeReader);
 
                 // <Advice> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
+                if (envelopeReader.IsStartElement(SamlConstants.Elements.Advice, SamlConstants.Namespace))
                     assertion.Advice = ReadAdvice(envelopeReader);
 
-                // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
+                // <Subject> 0-1
+                //if (envelopeReader.IsStartElement(SamlConstants.Elements.subject, Saml2Constants.Namespace))
+                //    assertion.Subject = ReadSubject(envelopeReader);             
+
+                // <Statement|AuthenticationStatement|AuthorizationDecisionStatement|AttributeStatement>, 0-OO
                 while (envelopeReader.IsStartElement())
                 {
-                    Saml2Statement statement;
+                    SamlStatement statement;
 
-                    if (envelopeReader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-                        statement = ReadStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace))
+                    //if (envelopeReader.IsStartElement(SamlConstants.Elements.Statement, SamlConstants.Namespace))
+                    //    statement = ReadStatement(envelopeReader);
+                    if (envelopeReader.IsStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace))
                         statement = ReadAttributeStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace))
+                    else if (envelopeReader.IsStartElement(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace))
                         statement = ReadAuthenticationStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace))
+                    else if (envelopeReader.IsStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace))
                         statement = ReadAuthorizationDecisionStatement(envelopeReader);
                     else
                         break;
@@ -230,24 +237,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
 
                 envelopeReader.ReadEndElement();
-                if (assertion.Subject == null)
-                {
-                    // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
-                    if (0 == assertion.Statements.Count)
-                        throw LogReadException(LogMessages.IDX11108, Saml2Constants.Elements.Assertion);
+                //if (assertion.Subject == null)
+                //{
+                //    // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
+                //    if (0 == assertion.Statements.Count)
+                //        throw LogReadException(LogMessages.IDX11108, Saml2Constants.Elements.Assertion);
 
-                    // Furthermore, the built-in statement types all require the presence of a subject.
-                    // [Saml2Core, lines 1050, 1168, 1280]
-                    foreach (Saml2Statement statement in assertion.Statements)
-                    {
-                        if (statement is Saml2AuthenticationStatement
-                            || statement is Saml2AttributeStatement
-                            || statement is Saml2AuthorizationDecisionStatement)
-                        {
-                            throw LogReadException(LogMessages.IDX11109, Saml2Constants.Elements.Assertion);
-                        }
-                    }
-                }
+                //    // Furthermore, the built-in statement types all require the presence of a subject.
+                //    // [Saml2Core, lines 1050, 1168, 1280]
+                //    foreach (Saml2Statement statement in assertion.Statements)
+                //    {
+                //        if (statement is Saml2AuthenticationStatement
+                //            || statement is Saml2AttributeStatement
+                //            || statement is Saml2AuthorizationDecisionStatement)
+                //        {
+                //            throw LogReadException(LogMessages.IDX11109, Saml2Constants.Elements.Assertion);
+                //        }
+                //    }
+                //}
 
                 // attach signedXml for validation of signature
                 assertion.Signature = envelopeReader.Signature;
@@ -255,10 +262,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             catch (Exception ex)
             {
-                if (ex is Saml2SecurityTokenReadException)
+                if (ex is SamlSecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion, ex);
+                throw LogReadException(LogMessages.IDX11112, ex, SamlConstants.Elements.Assertion, ex);
             }
         }
 
@@ -281,130 +288,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return LogHelper.LogExceptionMessage(new SamlSecurityTokenReadException(LogHelper.FormatInvariant(format, args)));
         }
 
-        /// <summary>
-        /// Reads a &lt;saml:Assertion> element.
-        /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
-        /// <returns>A <see cref="SamlAssertion"/> instance.</returns>
-        public virtual SamlAssertion ReadAssertion(XmlDictionaryReader reader)
-        {
-            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
-
-            var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
-            var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
-
-            // TODO - handle EncryptedAssertions
-            // If it's an EncryptedAssertion, we need to retrieve the plaintext
-            // and repoint our reader
-            //if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-            //{
-            //    EncryptingCredentials encryptingCredentials = null;
-            //    //plaintextReader = CreatePlaintextReaderFromEncryptedData(
-            //    //                    plaintextReader,
-            //    //                    out encryptingCredentials);
-
-            //    assertion.EncryptingCredentials = encryptingCredentials;
-            //}
-
-            try
-            {
-                // @xsi:type
-                XmlUtil.ValidateXsiType(envelopeReader, Saml2Constants.Types.AssertionType, Saml2Constants.Namespace);
-
-                // @Version - required - must be "2.0"
-                string version = envelopeReader.GetAttribute(Saml2Constants.Attributes.Version);
-                if (string.IsNullOrEmpty(version))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.Version);
-
-                if (!StringComparer.Ordinal.Equals(Saml2Constants.Version, version))
-                    throw LogReadException(LogMessages.IDX11137, version);
-
-                // @ID - required
-                string value = envelopeReader.GetAttribute(Saml2Constants.Attributes.ID);
-                if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
-
-                assertion.Id = new Saml2Id(value);
-
-                // @IssueInstant - required
-                value = envelopeReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
-                if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
-
-                assertion.IssueInstant = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
-
-                // will move to next element
-                // <ds:Signature> 0-1 read by EnvelopedSignatureReader
-                envelopeReader.Read();
-
-                // <Issuer> 1
-                assertion.Issuer = ReadIssuer(envelopeReader);
-
-                // <Subject> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
-                    assertion.Subject = ReadSubject(envelopeReader);
-
-                // <Conditions> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
-                    assertion.Conditions = ReadConditions(envelopeReader);
-
-                // <Advice> 0-1
-                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
-                    assertion.Advice = ReadAdvice(envelopeReader);
-
-                // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
-                while (envelopeReader.IsStartElement())
-                {
-                    Saml2Statement statement;
-
-                    if (envelopeReader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-                        statement = ReadStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace))
-                        statement = ReadAttributeStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace))
-                        statement = ReadAuthenticationStatement(envelopeReader);
-                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace))
-                        statement = ReadAuthorizationDecisionStatement(envelopeReader);
-                    else
-                        break;
-
-                    assertion.Statements.Add(statement);
-                }
-
-                envelopeReader.ReadEndElement();
-                if (assertion.Subject == null)
-                {
-                    // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
-                    if (0 == assertion.Statements.Count)
-                        throw LogReadException(LogMessages.IDX11108, Saml2Constants.Elements.Assertion);
-
-                    // Furthermore, the built-in statement types all require the presence of a subject.
-                    // [Saml2Core, lines 1050, 1168, 1280]
-                    foreach (Saml2Statement statement in assertion.Statements)
-                    {
-                        if (statement is Saml2AuthenticationStatement
-                            || statement is Saml2AttributeStatement
-                            || statement is Saml2AuthorizationDecisionStatement)
-                        {
-                            throw LogReadException(LogMessages.IDX11109, Saml2Constants.Elements.Assertion);
-                        }
-                    }
-                }
-
-                // attach signedXml for validation of signature
-                assertion.Signature = envelopeReader.Signature;
-                return assertion;
-            }
-            catch (Exception ex)
-            {
-                if (ex is Saml2SecurityTokenReadException)
-                    throw;
-
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion, ex);
-            }
-        }
-
-        internal static SamlId ReadSimpleNCNameElement(XmlDictionaryReader reader, string name)
+        internal static string ReadSimpleNCNameElement(XmlDictionaryReader reader, string name)
         {
             try
             {
@@ -414,9 +298,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 XmlUtil.ValidateXsiType(reader, XmlSignatureConstants.Attributes.NcName, XmlSignatureConstants.XmlSchemaNamespace);
 
                 reader.MoveToElement();
-                string value = reader.ReadElementContentAsString();
-
-                return new SamlId(value);
+                return reader.ReadElementContentAsString();
             }
             catch (Exception ex)
             {
@@ -553,74 +435,94 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //    return assertion;
         //}
 
-        //public virtual SamlAttribute ReadAttribute(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        /// <summary>
+        /// Reads the &lt;saml:Attribute> element.
+        /// </summary>
+        /// <remarks>
+        /// The default implementation requires that the content of the
+        /// Attribute element be a simple string. To handle complex content
+        /// or content of declared simple types other than xs:string, override
+        /// this method.
+        /// </remarks>
+        /// <param name="reader">An <see cref="XmlReader"/> positioned at a <see cref="SamlAttribute"/> element.</param>
+        /// <returns>A <see cref="SamlAttribute"/> instance.</returns>
+        public virtual SamlAttribute ReadAttribute(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    SamlAttribute attribute = new SamlAttribute();
+            SamlAttribute attribute = new SamlAttribute();
 
-        //    var name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
-        //    if (string.IsNullOrEmpty(name))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNameAttributeOnRead"));
+            var name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
+            if (string.IsNullOrEmpty(name))
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNameAttributeOnRead"));
 
-        //    var nameSpace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
-        //    if (string.IsNullOrEmpty(nameSpace))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNamespaceAttributeOnRead"));
+            var nameSpace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
+            if (string.IsNullOrEmpty(nameSpace))
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNamespaceAttributeOnRead"));
 
-        //    // TODO is this the right thing?
-        //    var claimType = string.IsNullOrEmpty(nameSpace) ? name : nameSpace + "/" + name;
+            // TODO is this the right thing?
+            var claimType = string.IsNullOrEmpty(nameSpace) ? name : nameSpace + "/" + name;
 
-        //    reader.MoveToContent();
-        //    reader.Read();
-        //    while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace))
-        //    {
-        //        // We will load all Attributes as a string value by default.
-        //        attribute.AttributeValues.Add(reader.ReadElementContentAsString());
-        //    }
+            reader.MoveToContent();
+            reader.Read();
+            while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace))
+            {
+                // We will load all Attributes as a string value by default.
+                attribute.AttributeValues.Add(reader.ReadElementContentAsString());
+            }
 
-        //    if (attribute.AttributeValues.Count == 0)
-        //        throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAttributeShouldHaveOneValue"));
+            if (attribute.AttributeValues.Count == 0)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAttributeShouldHaveOneValue"));
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return attribute;
-        //}
+            return attribute;
+        }
 
-        //protected virtual SamlAttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
-        //{
-        //    XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
+        /// <summary>
+        /// Reads the &lt;saml:AttributeStatement> element, or a
+        /// &lt;saml:Statement element that specifies an xsi:type of
+        /// saml:AttributeStatementType.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAttributeStatement"/> element.</param>
+        /// <returns>A <see cref="SamlAttributeStatement"/> instance.</returns>
+        protected virtual SamlAttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
+        {
+            XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
-        //    var statement = new SamlAttributeStatement();
-        //    statement.Subject = ReadSubject(reader);
-        //    while (reader.IsStartElement())
-        //    {
-        //        if (reader.IsStartElement(SamlConstants.Elements.Attribute, SamlConstants.Namespace))
-        //        {
-        //            SamlAttribute attribute = ReadAttribute(reader);
-        //            if (attribute == null)
-        //                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLUnableToLoadAttribute"));
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
+                throw LogReadException(LogMessages.IDX11119, SamlConstants.Elements.AttributeStatement, SamlConstants.Elements.Subject, SamlConstants.Elements.Assertion);
+            var statement = new SamlAttributeStatement();
+            statement.Subject = ReadSubject(reader);
+            while (reader.IsStartElement())
+            {
+                if (reader.IsStartElement(SamlConstants.Elements.Attribute, SamlConstants.Namespace))
+                {
+                    SamlAttribute attribute = ReadAttribute(reader);
+                    if (attribute == null)
+                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLUnableToLoadAttribute"));
 
-        //            statement.Attributes.Add(attribute);
-        //        }
-        //        else
-        //        {
-        //            break;
-        //        }
-        //    }
+                    statement.Attributes.Add(attribute);
+                }
+                else
+                {
+                    break;
+                }
+            }
 
-        //    if (statement.Attributes.Count == 0)
-        //    {
-        //        // Each Attribute statement should have at least one attribute.
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeStatementMissingAttributeOnRead"));
-        //    }
+            if (statement.Attributes.Count == 0)
+            {
+                // Each Attribute statement should have at least one attribute.
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeStatementMissingAttributeOnRead"));
+            }
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return statement;
-        //}
+            return statement;
+        }
 
         ///// <summary>
         ///// Read saml:AudienceRestrictionCondition from the given XmlReader.
@@ -696,276 +598,299 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //    return result;
         //}
 
-        //protected virtual SamlAudienceRestrictionCondition ReadAudienceRestrictionCondition(XmlDictionaryReader reader)
-        //{
-        //    XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        protected virtual SamlAudienceRestrictionCondition ReadAudienceRestrictionCondition(XmlDictionaryReader reader)
+        {
+            XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
 
-        //    reader.ReadStartElement();
-        //    var audienceRestrictionCondition = new SamlAudienceRestrictionCondition();
-        //    while (reader.IsStartElement())
-        //    {
-        //        if (reader.IsStartElement(SamlConstants.Elements.Audience, SamlConstants.Namespace))
-        //        {
-        //            string audience = reader.ReadElementContentAsString();
-        //            if (string.IsNullOrEmpty(audience))
-        //                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4083"));
+            reader.ReadStartElement();
+            var audienceRestrictionCondition = new SamlAudienceRestrictionCondition();
+            while (reader.IsStartElement())
+            {
+                if (reader.IsStartElement(SamlConstants.Elements.Audience, SamlConstants.Namespace))
+                {
+                    string audience = reader.ReadElementContentAsString();
+                    if (string.IsNullOrEmpty(audience))
+                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4083"));
 
-        //            audienceRestrictionCondition.Audiences.Add(new Uri(audience, UriKind.RelativeOrAbsolute));
-        //        }
-        //        else
-        //        {
-        //            throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlConstants.ElementNames.Audience, SamlConstants.Namespace, reader.LocalName, reader.NamespaceURI"));
-        //        }
-        //    }
+                    audienceRestrictionCondition.Audiences.Add(new Uri(audience, UriKind.RelativeOrAbsolute));
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlConstants.ElementNames.Audience, SamlConstants.Namespace, reader.LocalName, reader.NamespaceURI"));
+                }
+            }
 
-        //    if (audienceRestrictionCondition.Audiences.Count == 0)
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4084"));
+            if (audienceRestrictionCondition.Audiences.Count == 0)
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4084"));
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return audienceRestrictionCondition;
-        //}
+            return audienceRestrictionCondition;
+        }
 
-        ///// <summary>
-        ///// Read the saml:AuthenticationStatement.
-        ///// </summary>
-        ///// <param name="reader">XmlReader positioned at a saml:AuthenticationStatement.</param>
-        ///// <returns>SamlAuthenticationStatement</returns>
-        ///// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        ///// <exception cref="XmlException">The XmlReader is not positioned on a saml:AuthenticationStatement
-        ///// or the statement contains a unknown child element.</exception>
-        //protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        /// <summary>
+        /// Read the saml:AuthenticationStatement.
+        /// </summary>
+        /// <param name="reader">XmlReader positioned at a saml:AuthenticationStatement.</param>
+        /// <returns>SamlAuthenticationStatement</returns>
+        /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.
+        /// or the statement contains a unknown child element.</exception>
+        protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    var authenticationStatement = new SamlAuthenticationStatement();
+            var authenticationStatement = new SamlAuthenticationStatement();
 
-        //    string authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
-        //    if (string.IsNullOrEmpty(authInstance))
-        //        throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationInstant);
+            string authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
+            if (string.IsNullOrEmpty(authInstance))
+                throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationInstant);
 
-        //    var authenticationInstant = DateTime.ParseExact(
-        //        authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+            var authenticationInstant = DateTime.ParseExact(
+                authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
-        //    var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
-        //    if (string.IsNullOrEmpty(authenticationMethod))
-        //        throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationMethod);
+            var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
+            if (string.IsNullOrEmpty(authenticationMethod))
+                throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationMethod);
 
-        //    authenticationStatement.Subject = ReadSubject(reader);
-        //    if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
-        //    {
-        //        var dnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
-        //        var ipAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
+            authenticationStatement.Subject = ReadSubject(reader);
+            if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
+            {
+                var dnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
+                var ipAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
 
-        //        if (reader.IsEmptyElement)
-        //        {
-        //            reader.MoveToContent();
-        //            reader.Read();
-        //        }
-        //        else
-        //        {
-        //            reader.MoveToContent();
-        //            reader.Read();
-        //            reader.ReadEndElement();
-        //        }
-        //    }
+                if (reader.IsEmptyElement)
+                {
+                    reader.MoveToContent();
+                    reader.Read();
+                }
+                else
+                {
+                    reader.MoveToContent();
+                    reader.Read();
+                    reader.ReadEndElement();
+                }
+            }
 
-        //    while (reader.IsStartElement())
-        //    {
-        //        authenticationStatement.AuthorityBindings.Add(ReadAuthorityBinding(reader));
-        //    }
+            while (reader.IsStartElement())
+            {
+                authenticationStatement.AuthorityBindings.Add(ReadAuthorityBinding(reader));
+            }
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return authenticationStatement;
-        //}
+            return authenticationStatement;
+        }
 
-        //protected virtual SamlAuthorityBinding ReadAuthorityBinding(XmlDictionaryReader reader)
-        //{
-        //    XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
+        protected virtual SamlAuthorityBinding ReadAuthorityBinding(XmlDictionaryReader reader)
+        {
+            XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
 
-        //    string authKind = reader.GetAttribute(SamlConstants.Attributes.AuthorityKind, null);
-        //    if (string.IsNullOrEmpty(authKind))
-        //        throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthorityBinding, SamlConstants.Attributes.AuthorityKind);
+            string authKind = reader.GetAttribute(SamlConstants.Attributes.AuthorityKind, null);
+            if (string.IsNullOrEmpty(authKind))
+                throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthorityBinding, SamlConstants.Attributes.AuthorityKind);
 
-        //    string[] authKindParts = authKind.Split(':');
-        //    if (authKindParts.Length > 2)
-        //        throw XmlUtil.LogReadException(LogMessages.IDX11108, authKind);
+            string[] authKindParts = authKind.Split(':');
+            if (authKindParts.Length > 2)
+                throw XmlUtil.LogReadException(LogMessages.IDX11108, authKind);
 
-        //    string localName;
-        //    string prefix;
-        //    string nameSpace;
-        //    if (authKindParts.Length == 2)
-        //    {
-        //        prefix = authKindParts[0];
-        //        localName = authKindParts[1];
-        //    }
-        //    else
-        //    {
-        //        prefix = string.Empty;
-        //        localName = authKindParts[0];
-        //    }
+            string localName;
+            string prefix;
+            string nameSpace;
+            if (authKindParts.Length == 2)
+            {
+                prefix = authKindParts[0];
+                localName = authKindParts[1];
+            }
+            else
+            {
+                prefix = string.Empty;
+                localName = authKindParts[0];
+            }
 
-        //    nameSpace = reader.LookupNamespace(prefix);
-        //    var authorityKind = new XmlQualifiedName(localName, nameSpace);
+            nameSpace = reader.LookupNamespace(prefix);
+            var authorityKind = new XmlQualifiedName(localName, nameSpace);
 
-        //    var binding = reader.GetAttribute(SamlConstants.Attributes.Binding, null);
-        //    if (string.IsNullOrEmpty(binding))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingBindingOnRead"));
+            var binding = reader.GetAttribute(SamlConstants.Attributes.Binding, null);
+            if (string.IsNullOrEmpty(binding))
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingBindingOnRead"));
 
-        //    var location = reader.GetAttribute(SamlConstants.Attributes.Location, null);
-        //    if (string.IsNullOrEmpty(location))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingLocationOnRead"));
+            var location = reader.GetAttribute(SamlConstants.Attributes.Location, null);
+            if (string.IsNullOrEmpty(location))
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingLocationOnRead"));
 
-        //    if (reader.IsEmptyElement)
-        //    {
-        //        reader.MoveToContent();
-        //        reader.Read();
-        //    }
-        //    else
-        //    {
-        //        reader.MoveToContent();
-        //        reader.Read();
-        //        reader.ReadEndElement();
-        //    }
+            if (reader.IsEmptyElement)
+            {
+                reader.MoveToContent();
+                reader.Read();
+            }
+            else
+            {
+                reader.MoveToContent();
+                reader.Read();
+                reader.ReadEndElement();
+            }
 
-        //    return new SamlAuthorityBinding(authorityKind, binding, location);
-        //}
+            return new SamlAuthorityBinding(authorityKind, binding, location);
+        }
 
-        //protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    var statement = new SamlAuthorizationDecisionStatement();
+            var statement = new SamlAuthorizationDecisionStatement();
 
-        //    var resource = reader.GetAttribute(SamlConstants.Attributes.Resource, null);
-        //    if (string.IsNullOrEmpty(resource))
-        //        throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Resource);
+            var resource = reader.GetAttribute(SamlConstants.Attributes.Resource, null);
+            if (string.IsNullOrEmpty(resource))
+                throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Resource);
 
-        //    string decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
-        //    if (string.IsNullOrEmpty(decisionString))
-        //        throw XmlUtil.LogAttributeMissingReadException(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
+            string decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
+            if (string.IsNullOrEmpty(decisionString))
+                throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
 
-        //    if (decisionString.Equals(SamlAccessDecision.Deny.ToString(), StringComparison.OrdinalIgnoreCase))
-        //        statement.AccessDecision = SamlAccessDecision.Deny;
-        //    else if (decisionString.Equals(SamlAccessDecision.Permit.ToString(), StringComparison.OrdinalIgnoreCase))
-        //        statement.AccessDecision = SamlAccessDecision.Permit;
-        //    else
-        //        statement.AccessDecision = SamlAccessDecision.Indeterminate;
+            if (decisionString.Equals(SamlAccessDecision.Deny.ToString(), StringComparison.OrdinalIgnoreCase))
+                statement.AccessDecision = SamlAccessDecision.Deny;
+            else if (decisionString.Equals(SamlAccessDecision.Permit.ToString(), StringComparison.OrdinalIgnoreCase))
+                statement.AccessDecision = SamlAccessDecision.Permit;
+            else
+                statement.AccessDecision = SamlAccessDecision.Indeterminate;
 
-        //    reader.MoveToContent();
-        //    reader.Read();
+            reader.MoveToContent();
+            reader.Read();
 
-        //    if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
-        //        throw XmlUtil.LogElementMissingReadException(SamlConstants.Elements.Subject, reader.Name);
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
+                throw LogReadException(LogMessages.IDX11119, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Elements.Subject, SamlConstants.Elements.Assertion);
 
-        //    statement.Subject = ReadSubject(reader);
-        //    while (reader.IsStartElement())
-        //    {
-        //        if (reader.IsStartElement(SamlConstants.Elements.Action, SamlConstants.Namespace))
-        //        {
-        //            statement.Actions.Add(ReadAction(reader));
-        //        }
-        //        else if (reader.IsStartElement(SamlConstants.Elements.Evidence, SamlConstants.Namespace))
-        //        {
-        //            if (statement.Evidence != null)
-        //                throw XmlUtil.LogReadException(LogMessages.IDX11100, SamlConstants.Elements.Evidence);
+            statement.Subject = ReadSubject(reader);
+            while (reader.IsStartElement())
+            {
+                if (reader.IsStartElement(SamlConstants.Elements.Action, SamlConstants.Namespace))
+                {
+                    statement.Actions.Add(ReadAction(reader));
+                }
+                else if (reader.IsStartElement(SamlConstants.Elements.Evidence, SamlConstants.Namespace))
+                {
+                    if (statement.Evidence != null)
+                        throw XmlUtil.LogReadException(LogMessages.IDX11100, SamlConstants.Elements.Evidence);
 
-        //            statement.Evidence = ReadEvidence(reader);
-        //        }
-        //        else
-        //            throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Subject, reader.Name);
-        //    }
+                    statement.Evidence = ReadEvidence(reader);
+                }
+                else
+                    throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Subject, reader.Name);
+            }
 
-        //    if (statement.Actions.Count == 0)
-        //        throw XmlUtil.LogReadException(LogMessages.IDX11102);
+            if (statement.Actions.Count == 0)
+                throw XmlUtil.LogReadException(LogMessages.IDX11102);
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return statement;
-        //}
+            return statement;
+        }
 
-        //protected virtual SamlCondition ReadCondition(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        protected virtual SamlCondition ReadCondition(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    if (reader.IsStartElement(SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace))
-        //    {
-        //        return ReadAudienceRestrictionCondition(reader);
-        //    }
-        //    else if (reader.IsStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace))
-        //    {
-        //        return ReadDoNotCacheCondition(reader);
-        //    }
-        //    else
-        //        throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Conditions, reader.Name);
-        //}
+            if (reader.IsStartElement(SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace))
+            {
+                return ReadAudienceRestrictionCondition(reader);
+            }
+            else if (reader.IsStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace))
+            {
+                return ReadDoNotCacheCondition(reader);
+            }
+            else
+                throw LogReadException(LogMessages.IDX11118, reader.Name);
+        }
 
-        //protected virtual SamlConditions ReadConditions(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        /// <summary>
+        /// Reads the &lt;saml:Conditions> element.
+        /// </summary>
+        /// <remarks>
+        /// To handle custom &lt;saml:Condition> elements, override this
+        /// method.
+        /// </remarks>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlConditions"/> element.</param>
+        /// <returns>A <see cref="SamlConditions"/> instance.</returns>
+        protected virtual SamlConditions ReadConditions(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    //var conditions = new SamlConditions();
-        //    var nbf = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
-        //    string time = reader.GetAttribute(SamlConstants.Attributes.NotBefore, null);
-        //    if (!string.IsNullOrEmpty(time))
-        //        nbf = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+            //var conditions = new SamlConditions();
+            var nbf = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
+            string time = reader.GetAttribute(SamlConstants.Attributes.NotBefore, null);
+            if (!string.IsNullOrEmpty(time))
+                nbf = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
-        //    var notOnOrAfter = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
-        //    time = reader.GetAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
-        //    if (!string.IsNullOrEmpty(time))
-        //        notOnOrAfter = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+            var notOnOrAfter = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
+            time = reader.GetAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
+            if (!string.IsNullOrEmpty(time))
+                notOnOrAfter = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
-        //    var conditions = new SamlConditions(nbf, notOnOrAfter);
-        //    // Saml Conditions element is an optional element and all its child element
-        //    // are optional as well. So we can have a empty <saml:Conditions /> element
-        //    // in a valid Saml token.
-        //    if (reader.IsEmptyElement)
-        //    {
-        //        // Just issue a read to read the Empty element.
-        //        reader.MoveToContent();
-        //        reader.Read();
-        //        return conditions;
-        //    }
+            var conditions = new SamlConditions(nbf, notOnOrAfter);
+            // Saml Conditions element is an optional element and all its child element
+            // are optional as well. So we can have a empty <saml:Conditions /> element
+            // in a valid Saml token.
+            if (reader.IsEmptyElement)
+            {
+                // Just issue a read to read the Empty element.
+                reader.MoveToContent();
+                reader.Read();
+                return conditions;
+            }
 
-        //    reader.ReadStartElement();
-        //    while (reader.IsStartElement())
-        //    {
-        //        conditions.Conditions.Add(ReadCondition(reader));
-        //    }
+            reader.ReadStartElement();
+            while (reader.IsStartElement())
+            {
+                conditions.Conditions.Add(ReadCondition(reader));
+            }
 
-        //    reader.ReadEndElement();
+            reader.ReadEndElement();
 
-        //    return conditions;
-        //}
+            return conditions;
+        }
 
-        //protected virtual SamlDoNotCacheCondition ReadDoNotCacheCondition(XmlDictionaryReader reader)
-        //{
-        //    XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace, true);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        protected virtual SamlDoNotCacheCondition ReadDoNotCacheCondition(XmlDictionaryReader reader)
+        {
+            XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace);
 
-        //    // TODO what is this about
-        //    // saml:DoNotCacheCondition is a empty element. So just issue a read for
-        //    // the empty element.
-        //    if (reader.IsEmptyElement)
-        //    {
-        //        reader.MoveToContent();
-        //        reader.Read();
-        //        return new SamlDoNotCacheCondition();
-        //    }
+            // TODO what is this about
+            // saml:DoNotCacheCondition is a empty element. So just issue a read for
+            // the empty element.
+            if (reader.IsEmptyElement)
+            {
+                reader.MoveToContent();
+                reader.Read();
+                return new SamlDoNotCacheCondition();
+            }
 
-        //    reader.MoveToContent();
-        //    reader.Read();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.Read();
+            reader.ReadEndElement();
 
-        //    return new SamlDoNotCacheCondition();
-        //}
+            return new SamlDoNotCacheCondition();
+        }
 
         //protected virtual SamlEvidence ReadEvidence(XmlDictionaryReader reader)
         //{
@@ -995,20 +920,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //    return evidence;
         //}
 
-        //protected virtual SamlStatement ReadStatement(XmlDictionaryReader reader)
-        //{
-        //    if (reader == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(reader));
+        /// <summary>
+        /// Reads the &lt;saml:Statement> element.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Statement"/> element.</param>
+        /// <returns>An instance of <see cref="Saml2Statement"/> derived type.</returns>
+        /// <remarks>
+        /// The default implementation only handles Statement elements which
+        /// specify an xsi:type of saml:AttributeStatementType,
+        /// saml:AuthnStatementType, and saml:AuthzDecisionStatementType. To
+        /// handle custom statements, override this method.
+        /// </remarks>
+        protected virtual SamlStatement ReadStatement(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-        //    if (reader.IsStartElement(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace))
-        //        return ReadAuthenticationStatement(reader);
-        //    else if (reader.IsStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace))
-        //        return ReadAttributeStatement(reader);
-        //    else if (reader.IsStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace))
-        //        return ReadAuthorizationDecisionStatement(reader);
-        //    else
-        //        throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Assertion, reader.Name);
-        //}
+            if (reader.IsStartElement(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace))
+                return ReadAuthenticationStatement(reader);
+            else if (reader.IsStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace))
+                return ReadAttributeStatement(reader);
+            else if (reader.IsStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace))
+                return ReadAuthorizationDecisionStatement(reader);
+            else
+                throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Assertion, reader.Name);
+        }
 
         ///// <summary>
         ///// Read the SamlSubject from the XmlReader.
@@ -1017,78 +953,78 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         ///// <returns>SamlSubject</returns>
         ///// <exception cref="ArgumentNullException">The input argument 'reader' is null.</exception>
         ///// <exception cref="XmlException">The reader is not positioned at a SamlSubject.</exception>
-        //protected virtual SamlSubject ReadSubject(XmlDictionaryReader reader)
-        //{
-        //    XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
+        protected virtual SamlSubject ReadSubject(XmlDictionaryReader reader)
+        {
+            XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
-        //    var subject = new SamlSubject();
-        //    reader.Read();
-        //    if (reader.IsStartElement(SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace))
-        //    {
-        //        subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
-        //        subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+            var subject = new SamlSubject();
+            reader.Read();
+            if (reader.IsStartElement(SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace))
+            {
+                subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
 
-        //        // TODO - check for empty element
-        //        reader.MoveToContent();
-        //        subject.Name = reader.ReadElementContentAsString();
+                // TODO - check for empty element
+                reader.MoveToContent();
+                subject.Name = reader.ReadElementContentAsString();
 
-        //        if (string.IsNullOrEmpty(subject.Name))
-        //            throw XmlUtil.LogReadException(LogMessages.IDX11104);
-        //    }
+                if (string.IsNullOrEmpty(subject.Name))
+                    throw XmlUtil.LogReadException(LogMessages.IDX11104);
+            }
 
-        //    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace))
-        //    {
-        //        reader.MoveToContent();
-        //        reader.Read();
+            if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace))
+            {
+                reader.MoveToContent();
+                reader.Read();
 
-        //        while (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace))
-        //        {
-        //            string method = reader.ReadElementContentAsString();
-        //            if (string.IsNullOrEmpty(method))
-        //                throw XmlUtil.LogReadException(LogMessages.IDX11105);
+                while (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace))
+                {
+                    string method = reader.ReadElementContentAsString();
+                    if (string.IsNullOrEmpty(method))
+                        throw XmlUtil.LogReadException(LogMessages.IDX11105);
 
-        //            subject.ConfirmationMethods.Add(method);
-        //        }
+                    subject.ConfirmationMethods.Add(method);
+                }
 
-        //        if (subject.ConfirmationMethods.Count == 0)
-        //        {
-        //            // A SubjectConfirmaton clause should specify at least one ConfirmationMethod.
-        //            throw XmlUtil.LogReadException(LogMessages.IDX11106);
-        //        }
+                if (subject.ConfirmationMethods.Count == 0)
+                {
+                    // A SubjectConfirmaton clause should specify at least one ConfirmationMethod.
+                    throw XmlUtil.LogReadException(LogMessages.IDX11106);
+                }
 
-        //        if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
-        //        {
-        //            // An Authentication protocol specified in the confirmation method might need this
-        //            // data. Just store this content value as string.
-        //            subject.ConfirmationData = reader.ReadElementContentAsString();
-        //        }
+                if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
+                {
+                    // An Authentication protocol specified in the confirmation method might need this
+                    // data. Just store this content value as string.
+                    subject.ConfirmationData = reader.ReadElementContentAsString();
+                }
 
-        //        if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
-        //        {
-        //            XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader);
-        //            // TODO - we need to get the key
-        //            /// subject.Key = ReadSecurityKey(dictionaryReader);
-        //            //this.crypto = SamlSerializer.ResolveSecurityKey(this.securityKeyIdentifier, outOfBandTokenResolver);
-        //            //if (this.crypto == null)
-        //            //{
-        //            //    throw LogHelper.LogExceptionMessage(new SecurityTokenException(SR.GetString(SR.SamlUnableToExtractSubjectKey)));
-        //            //}
-        //            //this.subjectToken = SamlSerializer.ResolveSecurityToken(this.securityKeyIdentifier, outOfBandTokenResolver);
-        //        }
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
+                {
+                    XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+                    // TODO - we need to get the key
+                    /// subject.Key = ReadSecurityKey(dictionaryReader);
+                    //this.crypto = SamlSerializer.ResolveSecurityKey(this.securityKeyIdentifier, outOfBandTokenResolver);
+                    //if (this.crypto == null)
+                    //{
+                    //    throw LogHelper.LogExceptionMessage(new SecurityTokenException(SR.GetString(SR.SamlUnableToExtractSubjectKey)));
+                    //}
+                    //this.subjectToken = SamlSerializer.ResolveSecurityToken(this.securityKeyIdentifier, outOfBandTokenResolver);
+                }
 
 
-        //        if ((subject.ConfirmationMethods.Count == 0) && (string.IsNullOrEmpty(subject.Name)))
-        //            throw XmlUtil.LogReadException(LogMessages.IDX11107);
+                if ((subject.ConfirmationMethods.Count == 0) && (string.IsNullOrEmpty(subject.Name)))
+                    throw XmlUtil.LogReadException(LogMessages.IDX11107);
 
-        //        reader.MoveToContent();
-        //        reader.ReadEndElement();
-        //    }
+                reader.MoveToContent();
+                reader.ReadEndElement();
+            }
 
-        //    reader.MoveToContent();
-        //    reader.ReadEndElement();
+            reader.MoveToContent();
+            reader.ReadEndElement();
 
-        //    return subject;
-        //}
+            return subject;
+        }
 
         ///// <summary>
         ///// Read the SamlSubject KeyIdentifier from a XmlReader.
@@ -1107,12 +1043,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //    return keyInfo;
         //}
 
-        //public virtual SamlSecurityToken ReadToken(XmlDictionaryReader reader)
-        //{
-        //    var assertion = ReadAssertion(reader);
+        protected virtual SamlSubjectStatement ReadSubjectStatement(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+        }
 
-        //    return new SamlSecurityToken(assertion);
-        //}
+        public virtual SamlSecurityToken ReadToken(XmlDictionaryReader reader)
+        {
+            var assertion = ReadAssertion(reader);
+
+            return new SamlSecurityToken(assertion);
+        }
 
         //protected virtual void WriteAction(XmlWriter writer, SamlAction action)
         //{
@@ -1627,5 +1569,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //{
         //    writer.WriteStartElement(SamlConstants.PreferredPrefix, name, ns);            
         //}
+
+#pragma warning restore 1591
     }
 }

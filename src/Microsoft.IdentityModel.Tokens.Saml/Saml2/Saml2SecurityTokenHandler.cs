@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="ArgumentException">token.Length > MamimumTokenSizeInBytes.</exception>
-        /// <exception cref="Saml2SecurityTokenReadException">if the token is not well-formed.</exception>
+        /// <exception cref="SamlSecurityTokenReadException">if the token is not well-formed.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> representing the identity contained in the token.</returns>
         public ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {

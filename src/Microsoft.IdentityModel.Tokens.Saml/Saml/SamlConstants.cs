@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Known values for <see cref="Microsoft.IdentityModel.Tokens.SamlAuthenticationStatement"/>
+        /// Known values for <see cref="Microsoft.IdentityModel.Tokens.Saml.SamlAuthenticationStatement"/>
         /// </summary>
         public static class AuthenticationMethods
         {
